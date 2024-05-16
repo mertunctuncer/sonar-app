@@ -11,5 +11,6 @@ interface BluetoothConnectionService : AutoCloseable, ContextOwner {
     val connection: StateFlow<BluetoothConnection?>
 
     suspend fun connect(device: BluetoothDevice) : BluetoothConnection?
+    fun pairAndConnect(device: BluetoothDevice)
     fun closeConnection()
 }

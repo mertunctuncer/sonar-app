@@ -15,7 +15,9 @@ interface BluetoothController : ContextOwner, AutoCloseable {
     fun stopDiscovery()
 
     val isConnected: StateFlow<Boolean>
+    val isScanning: StateFlow<Boolean>
 
     suspend fun connect(device: BluetoothDevice): BluetoothConnection?
+    suspend fun pairAndConnect(device: BluetoothDevice)
     fun disconnect()
 }

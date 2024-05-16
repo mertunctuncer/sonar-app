@@ -54,7 +54,8 @@ fun BluetoothDeviceList (
             DeviceList(
                 modifier = Modifier.padding(15.dp),
                 title = "Scanned Devices",
-                devices = scannedDevices
+                devices = scannedDevices,
+                onDeviceClick = onDeviceClick
             )
         }
     }
