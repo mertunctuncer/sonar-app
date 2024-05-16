@@ -1,9 +1,7 @@
 package com.github.mertunctuncer.projectsonar.domain
 
 import android.bluetooth.BluetoothSocket
-import android.content.Context
 import android.util.Log
-import com.github.mertunctuncer.projectsonar.utilities.ContextOwner
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -13,19 +11,20 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class InsecureBluetoothConnection(
 
-    private val bluetoothSocket: BluetoothSocket
+    private val bluetoothSocket: BluetoothSocket,
+    lifecycleScope: CoroutineScope
 ) : BluetoothConnection {
-    private val active = AtomicBoolean(true);
+    private val active = AtomicBoolean(true)
     init {
-
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             if (!bluetoothSocket.isConnected) {
-                Log.i("Bluetooth", "Bluetooth socket is no longer connected, stopping flow.")
+                Log.i("Bluetooth", "Bluetooth socket is no longer connected, stopping the thread.")
                 active.set(false)
+                return@launch
             }
 
             val buffer = ByteArray(1024)
-            var index = 0;
+            var index = 0
             while (active.get()) {
                 try {
                     buffer[index] = bluetoothSocket.inputStream.read().toByte()
@@ -37,6 +36,9 @@ class InsecureBluetoothConnection(
                     } else index++
                 } catch (e: IOException) {
                     Log.i("Bluetooth", "Failed to read message!")
+                    active.set(false)
+                    return@launch
+
                 }
             }
         }.invokeOnCompletion {
