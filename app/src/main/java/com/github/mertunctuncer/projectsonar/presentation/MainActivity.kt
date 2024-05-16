@@ -35,9 +35,6 @@ class MainActivity : ComponentActivity() {
     private val bluetoothAdapter by lazy { bluetoothManager.adapter }
     private val isBluetoothEnabled get() = bluetoothAdapter?.isEnabled == true
 
-    private val bluetoothController by lazy { AndroidBluetoothConnectionService(this, bluetoothAdapter) }
-    private val bluetoothViewModel by lazy { BluetoothViewModel(bluetoothController) }
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +44,6 @@ class MainActivity : ComponentActivity() {
         requestStartBluetooth()
         requestBluetoothPermission()
 
-        bluetoothController.startBluetoothServer()
         setContent {
             var sonarScreenActive by remember {
                 mutableStateOf(false)
@@ -58,14 +54,9 @@ class MainActivity : ComponentActivity() {
 
             }
             ProjectSonarTheme {
-                if(sonarScreenActive) SonarScreen(bluetoothController) {
-                    sonarScreenActive = !sonarScreenActive
-                }
-                else BluetoothScreen(bluetoothViewModel, {
-                    sonarScreenActive = !sonarScreenActive
-                }, {
-                    bluetoothViewModel.connect(it)
-                })
+                BluetoothScreen(state = BluetoothViewModel.BluetoothUIState(),
+                    onNavClick = { /*TODO*/ }, onDeviceClick = {})
+
             }
         }
 
@@ -73,8 +64,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-
-        bluetoothController.close()
     }
 
     private fun requestStartBluetooth() {
