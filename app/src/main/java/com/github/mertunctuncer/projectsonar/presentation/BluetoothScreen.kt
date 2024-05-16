@@ -33,19 +33,53 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.mertunctuncer.projectsonar.domain.BluetoothDevice
+import com.github.mertunctuncer.projectsonar.domain.BluetoothDeviceData
 import com.github.mertunctuncer.projectsonar.ui.component.BluetoothDeviceList
 import com.github.mertunctuncer.projectsonar.ui.component.ThemedTopBar
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.emptyFlow
+import com.github.mertunctuncer.projectsonar.ui.theme.ProjectSonarTheme
+
+
+@Preview
+@Composable
+fun PreviewBluetoothScreen() {
+
+    ProjectSonarTheme {
+        val state = BluetoothViewModel.BluetoothUIState(
+            pairedDevices = listOf(
+                BluetoothDevice("Name1", "Address1"),
+                BluetoothDevice("Name2", "Address1"),
+                BluetoothDevice("Name3", "Address1"),
+                BluetoothDevice("Name4", "Address1"),
+                BluetoothDevice("Name5", "Address1"),
+                BluetoothDevice("Name6", "Address1"),
+                BluetoothDevice("Name7", "Address1"),
+            ),
+            scannedDevices = listOf(
+                BluetoothDevice("Name1", "Address1"),
+                BluetoothDevice("Name2", "Address1"),
+                BluetoothDevice("Name3", "Address1"),
+                BluetoothDevice("Name4", "Address1"),
+                BluetoothDevice("Name5", "Address1"),
+                BluetoothDevice("Name6", "Address1"),
+                BluetoothDevice("Name7", "Address1"),
+            )
+        )
+        BluetoothScreen(
+            modifier = Modifier,
+            state = state,
+            onNavClick = {},
+            onDeviceClick = {}
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BluetoothScreen(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     state: BluetoothViewModel.BluetoothUIState,
-    onNavClick: () -> Unit,
-    onDeviceClick: (BluetoothDevice) -> Unit
+    onNavClick: () -> Unit = {},
+    onDeviceClick: (BluetoothDevice) -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -74,16 +108,6 @@ fun BluetoothScreen(
     }
 }
 
-@Preview
-@Composable
-fun PreviewBluetoothScreen() {
-    BluetoothScreen(
-        modifier = Modifier,
-        state = BluetoothViewModel.BluetoothUIState(),
-        onNavClick = {},
-        onDeviceClick = {}
-    )
-}
 
 
 
