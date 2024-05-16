@@ -1,45 +1,48 @@
 package com.github.mertunctuncer.projectsonar.domain
 
 import android.bluetooth.BluetoothSocket
+import android.content.Context
 import android.util.Log
+import com.github.mertunctuncer.projectsonar.utilities.ContextOwner
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
 
 
 class InsecureBluetoothConnection(
+
     private val bluetoothSocket: BluetoothSocket
 ) : BluetoothConnection {
-
     private val active = AtomicBoolean(true);
+    init {
 
-    override val receivedMessages: Flow<String> = flow {
-        if (!bluetoothSocket.isConnected) return@flow
-
-        val buffer = ByteArray(1024)
-        var index = 0;
-        while (active.get()) {
-            try {
-                buffer[index] = bluetoothSocket.inputStream.read().toByte()
-                if(buffer[index] == '\n'.code.toByte()) {
-                    val message = String(buffer, 0, index)
-                    Log.i("Bluetooth", "Received message: \"$message\"")
-                    emit(message)
-                    index = 0
-                } else index++
-            } catch (e: IOException) {
-                Log.i("Bluetooth", "Failed to read message!")
+        CoroutineScope(Dispatchers.IO).launch {
+            if (!bluetoothSocket.isConnected) {
+                Log.i("Bluetooth", "Bluetooth socket is no longer connected, stopping flow.")
+                active.set(false)
             }
+
+            val buffer = ByteArray(1024)
+            var index = 0;
+            while (active.get()) {
+                try {
+                    buffer[index] = bluetoothSocket.inputStream.read().toByte()
+                    if(buffer[index] == '\n'.code.toByte()) {
+                        val message = String(buffer, 0, index)
+                        Log.i("Bluetooth", "Received message: \"$message\"")
+
+                        index = 0
+                    } else index++
+                } catch (e: IOException) {
+                    Log.i("Bluetooth", "Failed to read message!")
+                }
+            }
+        }.invokeOnCompletion {
+            bluetoothSocket.close()
         }
-    }.onCompletion {
-        bluetoothSocket.close()
-    }.flowOn(Dispatchers.IO)
+    }
 
     override fun sendMessage(message: String) = CoroutineScope(Dispatchers.IO).launch {
         if (!active.get()) throw IllegalStateException("Connection has been closed!")
