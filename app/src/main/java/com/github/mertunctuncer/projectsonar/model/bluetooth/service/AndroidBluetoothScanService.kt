@@ -24,6 +24,8 @@ class AndroidBluetoothScanService(
     private val bluetoothAdapter: BluetoothAdapter
 ): BluetoothScanService {
 
+
+
     private val foundDeviceReceiver = object : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
@@ -49,20 +51,19 @@ class AndroidBluetoothScanService(
     }
 
     init {
-        fetchPairedDevices()
         context.registerReceiver(
             foundDeviceReceiver,
             IntentFilter(BluetoothDevice.ACTION_FOUND)
         )
     }
+    private val _isScanning: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val isScanning: StateFlow<Boolean> get() = _isScanning.asStateFlow()
 
     private val _scannedDevices = MutableStateFlow<List<BluetoothDeviceData>>(emptyList())
-    override val scannedDevices: StateFlow<List<BluetoothDeviceData>>
-        get() = _scannedDevices.asStateFlow()
+    override val scannedDevices: StateFlow<List<BluetoothDeviceData>> get() = _scannedDevices.asStateFlow()
 
     private val _pairedDevices = MutableStateFlow<List<BluetoothDeviceData>>(emptyList())
-    override val pairedDevices: StateFlow<List<BluetoothDeviceData>>
-        get() = _pairedDevices.asStateFlow()
+    override val pairedDevices: StateFlow<List<BluetoothDeviceData>> get() = _pairedDevices.asStateFlow()
 
 
     private fun fetchPairedDevices() {
@@ -81,6 +82,7 @@ class AndroidBluetoothScanService(
 
         Log.i("Bluetooth", "Started discovery.")
         bluetoothAdapter.startDiscovery()
+        _isScanning.update { true }
     }
 
     override fun stopDiscovery() {
@@ -88,9 +90,11 @@ class AndroidBluetoothScanService(
 
         Log.i("Bluetooth", "Stopped discovery.")
         bluetoothAdapter.cancelDiscovery()
+        _isScanning.update { false }
     }
 
     override fun close() {
         context.unregisterReceiver(foundDeviceReceiver)
+        stopDiscovery()
     }
 }
