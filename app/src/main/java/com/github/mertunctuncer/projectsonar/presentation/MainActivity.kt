@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.github.mertunctuncer.projectsonar.presentation
 
 import android.Manifest
@@ -13,29 +11,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.github.mertunctuncer.projectsonar.model.bluetooth.service.AndroidBluetoothConnectionService
+import androidx.lifecycle.lifecycleScope
+import com.github.mertunctuncer.projectsonar.model.bluetooth.AndroidBluetoothController
 import com.github.mertunctuncer.projectsonar.ui.theme.ProjectSonarTheme
 
 
 class MainActivity : ComponentActivity() {
 
-
-
-
     private val bluetoothManager by lazy {
         applicationContext.getSystemService(BluetoothManager::class.java)
     }
+
     private val bluetoothAdapter by lazy { bluetoothManager.adapter }
     private val isBluetoothEnabled get() = bluetoothAdapter?.isEnabled == true
 
+    private val bluetoothController by lazy { AndroidBluetoothController(this, bluetoothAdapter, lifecycleScope
+    ) }
 
+    private val bluetoothViewModel by lazy { BluetoothViewModel(bluetoothController) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,8 +53,9 @@ class MainActivity : ComponentActivity() {
 
             }
             ProjectSonarTheme {
-                BluetoothScreen(state = BluetoothViewModel.BluetoothUIState(),
-                    onNavClick = { /*TODO*/ }, onDeviceClick = {})
+                BluetoothScreen(
+                    viewModel = bluetoothViewModel,
+                    onNavClick = { /*TODO*/ },)
 
             }
         }
@@ -64,6 +64,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        bluetoothController.disconnect()
     }
 
     private fun requestStartBluetooth() {
@@ -99,7 +100,7 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             permissionLauncher.launch(
                 arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.BLUETOOTH_PRIVILEGED,
                     Manifest.permission.BLUETOOTH_ADMIN,
                     Manifest.permission.BLUETOOTH_SCAN,
                     Manifest.permission.BLUETOOTH_ADVERTISE,
