@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,20 +34,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.PointMode
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.github.mertunctuncer.projectsonar.domain.BluetoothProtocol
+import com.github.mertunctuncer.projectsonar.domain.ControlMessage
+import com.github.mertunctuncer.projectsonar.domain.SonarData
+import com.github.mertunctuncer.projectsonar.model.bluetooth.BluetoothController
 import com.github.mertunctuncer.projectsonar.model.bluetooth.service.BluetoothConnectionService
+import com.github.mertunctuncer.projectsonar.ui.component.ConnectionCard
 import com.github.mertunctuncer.projectsonar.ui.theme.Purple40
 import com.github.mertunctuncer.projectsonar.ui.theme.Purple80
 import com.github.mertunctuncer.projectsonar.ui.theme.PurpleGrey40
 import kotlinx.coroutines.runBlocking
 import kotlin.math.cos
+import kotlin.math.max
 import kotlin.math.sin
 
-/*
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SonarScreen(controller: BluetoothConnectionService, onClick: () -> Unit) {
+fun SonarScreen(viewModel: RadarViewModel, onNavClick: () -> Unit) {
+    val state by viewModel.state.collectAsState()
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -58,7 +71,7 @@ fun SonarScreen(controller: BluetoothConnectionService, onClick: () -> Unit) {
                     Text("Sonar Control")
                 },
                 navigationIcon = {
-                    IconButton(onClick = onClick) {
+                    IconButton(onClick = onNavClick) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Bluetooth Settings"
@@ -69,21 +82,25 @@ fun SonarScreen(controller: BluetoothConnectionService, onClick: () -> Unit) {
         },
     ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             val points = mutableListOf<Pair<Float, Float>>()
             points.add(Pair(10f, 15f))
             points.add(Pair(94f, 14f))
-            DrawRadar(180f, 30f, points)
-            ControlButtons(controller)
+            DrawRadar(180f, 30f, state.lastPoints)
+            Text(
+                text = "Distance: ${state.lastDistance} cm",
+                fontSize = 30.sp
+            )
         }
 
     }
 }
 
 @Composable
-fun DrawRadar(angle: Float, maxDistance: Float, detectedPoints: List<Pair<Float, Float>>) {
+fun DrawRadar(angle: Float, maxDistance: Float, detectedPoints: List<SonarData>) {
     Canvas(
         modifier = Modifier
             .fillMaxWidth()
@@ -91,41 +108,67 @@ fun DrawRadar(angle: Float, maxDistance: Float, detectedPoints: List<Pair<Float,
             .padding(30.dp, 30.dp),
         onDraw = {
 
-            drawArc(Purple40, 0f, -180f, true)
-            drawArc(PurpleGrey40, 0f, -180f, true,
+            drawArc(Color.Black, 0f, -180f, true)
+            drawArc(Color.DarkGray, 0f, -180f, true,
                 topLeft = Offset(this.size.width * 0.01f, this.size.height * 0.01f),
                 size = Size(this.size.width * 0.98f, this.size.height * 0.98f)
             )
-            drawArc(Purple40, 0f, -180f, true,
+            drawArc(Color.Black, 0f, -180f, true,
                 topLeft = Offset(this.size.width * 0.20f, this.size.height * 0.20f),
                 size = Size(this.size.width * 0.60f, this.size.height * 0.60f)
             )
-            drawArc(PurpleGrey40, 0f, -180f, true,
+            drawArc(Color.DarkGray, 0f, -180f, true,
                 topLeft = Offset(this.size.width * 0.21f, this.size.height * 0.21f),
                 size = Size(this.size.width * 0.58f, this.size.height * 0.58f)
             )
-            drawArc(Purple80, (-1) * (angle + 4f),  8f, true,
-                blendMode = BlendMode.Overlay
-            )
-            val radius = size.width / 2
-            Log.i("Sonar radius", "$radius")
 
-            val points = detectedPoints.filter { it.second < maxDistance }.map {
-                val ratio = it.second / maxDistance
-                val size = ratio * radius
+            drawArc(Color.Black, 0f, -1f, true,)
+            drawArc(Color.Black, -30f, -1f, true,)
+            drawArc(Color.Black, -60f, -1f, true,)
+            drawArc(Color.Black, -90f, -1f, true,)
+            drawArc(Color.Black, -120f, -1f, true,)
+            drawArc(Color.Black, -150f, -1f, true,)
+            drawArc(Color.Black, -180f, -1f, true,)
 
-                val offset = Offset(radius + cos(it.first) * size, radius - sin(it.first) * size)
-                Log.i("Sonar", offset.toString())
-                return@map offset
+
+
+            detectedPoints.forEachIndexed { index, sonarData ->
+                val ratio = (index.toFloat() + 1) / detectedPoints.size
+                if(sonarData.distance > maxDistance) {
+                    drawArc(
+                        Color.Green, -1 * (sonarData.angle -1), 2f, true,
+                        size = this.size,
+                        alpha = ratio,
+                        blendMode = BlendMode.Overlay
+                    )
+                } else {
+                    val length = sonarData.distance / maxDistance
+                    drawArc(
+                        Color.Red, -1 * (sonarData.angle -1), 2f, true,
+                        size = this.size,
+                        alpha = ratio,
+                        blendMode = BlendMode.Color
+                    )
+                    drawArc(
+                        Color.Green, -1 * (sonarData.angle -1), 2f, true,
+                        size = Size(this.size.width * length, this.size.height * length),
+                        topLeft = Offset(this.size.width * (1 - length) / 2, this.size.height * (1-length) / 2),
+                        alpha = ratio,
+                        blendMode = BlendMode.Color
+                    )
+                }
             }
-            drawPoints(points, PointMode.Points, Purple80)
+
         }
     )
 }
 
 @Composable
-fun ControlButtons(controller: BluetoothConnectionService) {
+fun ControlButtons(controller: BluetoothController) {
     var started by remember { mutableStateOf(false) }
+    val connection by controller.activeConnection.collectAsState()
+
+    
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -134,18 +177,18 @@ fun ControlButtons(controller: BluetoothConnectionService) {
         if(started) StopButton {
             runBlocking {
                 started = !started
-                controller.trySendMessage("1")
+                connection?.sendMessage(ControlMessage(BluetoothProtocol.AUTO_TURN_OFF))
             }
         }
         else StartButton {
             runBlocking {
                 started = !started
-                controller.trySendMessage("0")
+                connection?.sendMessage(ControlMessage(BluetoothProtocol.AUTO_TURN_ON))
             }
         }
         ResetButton {
             runBlocking {
-                controller.trySendMessage("2")
+                connection?.sendMessage(ControlMessage(BluetoothProtocol.RESET_ANGLE))
             }
         }
     }
@@ -207,4 +250,3 @@ fun ResetButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
         }
     }
 }
-*/

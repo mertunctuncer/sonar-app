@@ -20,9 +20,11 @@ class BluetoothViewModel(
     data class BluetoothUIState(
         val scannedDevices: List<BluetoothDeviceData> = emptyList(),
         val pairedDevices: List<BluetoothDeviceData> = emptyList(),
+        val connectedDevice: String? = null,
         val isConnected: Boolean = false,
         val isScanning: Boolean = false,
         val isConnecting: Boolean = false,
+        val isDisconnecting: Boolean = false,
         val errorMessage: String? = null,
     )
 
@@ -35,12 +37,25 @@ class BluetoothViewModel(
         bluetoothController.isScanning,
         _state
     ) { scannedDevices, pairedDevices, isConnected, isScanning, state ->
+        val updateDisconnecting = !isConnected
+
+        if(updateDisconnecting ) {
+            state.copy(
+                scannedDevices = scannedDevices,
+                pairedDevices = pairedDevices,
+                isConnected = isConnected,
+                isScanning = isScanning,
+                isDisconnecting = false
+            )
+        } else {
+
         state.copy(
             scannedDevices = scannedDevices,
             pairedDevices = pairedDevices,
             isConnected = isConnected,
             isScanning = isScanning
         )
+            }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _state.value)
 
     fun connect(device: BluetoothDeviceData) = viewModelScope.launch {
@@ -55,6 +70,8 @@ class BluetoothViewModel(
             val result = bluetoothController.connect(device)
             if (result == null) _state.update {
                 it.copy(
+                    isConnecting = false,
+                    connectedDevice = null,
                     errorMessage = "Failed to connect to ${device.name}!"
                 )
             } else {
@@ -62,7 +79,8 @@ class BluetoothViewModel(
                     it.copy(
                         isConnected = true,
                         isConnecting = false,
-                        errorMessage = null
+                        errorMessage = null,
+                        connectedDevice = device.name
                     )
                 }
             }
@@ -73,6 +91,7 @@ class BluetoothViewModel(
 
 
     fun disconnect() {
+        _state.update { it.copy(isDisconnecting = true) }
         bluetoothController.disconnect()
         _state.update { it.copy(
             isConnecting = false,
@@ -80,6 +99,12 @@ class BluetoothViewModel(
         ) }
     }
 
+
+    fun removeErrorDialog() {
+        _state.update {
+            it.copy(errorMessage = null)
+        }
+    }
 
 
     fun startScan() {

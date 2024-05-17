@@ -2,7 +2,9 @@ package com.github.mertunctuncer.projectsonar.model.bluetooth
 
 import com.github.mertunctuncer.projectsonar.domain.BluetoothConnection
 import com.github.mertunctuncer.projectsonar.domain.BluetoothDevice
+import com.github.mertunctuncer.projectsonar.domain.SonarData
 import com.github.mertunctuncer.projectsonar.utilities.ContextOwner
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 interface BluetoothController : ContextOwner, AutoCloseable {
@@ -10,6 +12,7 @@ interface BluetoothController : ContextOwner, AutoCloseable {
 
     val scannedDevices: StateFlow<List<BluetoothDevice>>
     val pairedDevices: StateFlow<List<BluetoothDevice>>
+    val lastPoints: MutableStateFlow<List<SonarData>>
 
     fun startDiscovery()
     fun stopDiscovery()

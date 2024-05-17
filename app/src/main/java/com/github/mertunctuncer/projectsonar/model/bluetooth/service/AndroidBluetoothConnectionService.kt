@@ -16,6 +16,7 @@ import android.util.Log
 import com.github.mertunctuncer.projectsonar.domain.BluetoothConnection
 import com.github.mertunctuncer.projectsonar.domain.BluetoothDeviceData
 import com.github.mertunctuncer.projectsonar.domain.InsecureBluetoothConnection
+import com.github.mertunctuncer.projectsonar.model.bluetooth.BluetoothController
 import com.github.mertunctuncer.projectsonar.utilities.toDomain
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +34,8 @@ class AndroidBluetoothConnectionService(
     override val context: Context,
     private val lifecycleScope: CoroutineScope,
     private val bluetoothAdapter: BluetoothAdapter,
-    private val bluetoothScanService: BluetoothScanService
+    private val bluetoothScanService: BluetoothScanService,
+    private val bluetoohController: BluetoothController
 ) : BluetoothConnectionService {
 
     private val _activeConnection: MutableStateFlow<BluetoothConnection?> = MutableStateFlow(null)
@@ -133,7 +135,7 @@ class AndroidBluetoothConnectionService(
 
         val socket: BluetoothSocket =
             bluetoothDevice.createInsecureRfcommSocketToServiceRecord(uuid)
-        //connectionSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid)
+        //bluetoothDevice.createRfcommSocketToServiceRecord(uuid)
 
         bluetoothScanService.stopDiscovery()
 
@@ -146,7 +148,7 @@ class AndroidBluetoothConnectionService(
                     "Connected to device ${bluetoothDevice.name} - ${bluetoothDevice.address}"
                 )
 
-                val connection = InsecureBluetoothConnection(socket, lifecycleScope)
+                val connection = InsecureBluetoothConnection(socket, lifecycleScope, bluetoohController)
                 _activeConnection.update {
                     connection
                 }

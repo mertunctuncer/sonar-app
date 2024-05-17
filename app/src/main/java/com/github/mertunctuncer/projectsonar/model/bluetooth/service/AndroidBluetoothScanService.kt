@@ -11,6 +11,7 @@ import android.content.IntentFilter
 import android.os.Build
 import android.util.Log
 import com.github.mertunctuncer.projectsonar.domain.BluetoothDeviceData
+import com.github.mertunctuncer.projectsonar.model.bluetooth.BluetoothController
 import com.github.mertunctuncer.projectsonar.utilities.toDomain
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.update
 class AndroidBluetoothScanService(
     override val context: Context,
     private val bluetoothAdapter: BluetoothAdapter
+
 ): BluetoothScanService {
 
 

@@ -35,6 +35,7 @@ class MainActivity : ComponentActivity() {
     ) }
 
     private val bluetoothViewModel by lazy { BluetoothViewModel(bluetoothController) }
+    private val radarViewModel by lazy { RadarViewModel(bluetoothController, this)}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,16 +48,19 @@ class MainActivity : ComponentActivity() {
             var sonarScreenActive by remember {
                 mutableStateOf(false)
             }
-            Surface(
-                color = MaterialTheme.colorScheme.background
-            ) {
 
-            }
             ProjectSonarTheme {
-                BluetoothScreen(
-                    viewModel = bluetoothViewModel,
-                    onNavClick = { /*TODO*/ },)
-
+                if(sonarScreenActive) SonarScreen(
+                    viewModel = radarViewModel,
+                    onNavClick = {
+                        sonarScreenActive = !sonarScreenActive
+                    }
+                ) else {
+                    BluetoothScreen(
+                        viewModel = bluetoothViewModel,
+                        onNavClick = { sonarScreenActive = !sonarScreenActive },
+                    )
+                }
             }
         }
 

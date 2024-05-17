@@ -6,8 +6,11 @@ import com.github.mertunctuncer.projectsonar.domain.BluetoothDevice
 import com.github.mertunctuncer.projectsonar.model.bluetooth.service.AndroidBluetoothConnectionService
 import com.github.mertunctuncer.projectsonar.model.bluetooth.service.AndroidBluetoothScanService
 import com.github.mertunctuncer.projectsonar.domain.BluetoothConnection
+import com.github.mertunctuncer.projectsonar.domain.SonarData
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.util.concurrent.ArrayBlockingQueue
 
 class AndroidBluetoothController(
     override val context: Context,
@@ -16,12 +19,13 @@ class AndroidBluetoothController(
 ) : BluetoothController {
 
     private val bluetoothScanService = AndroidBluetoothScanService(context, bluetoothAdapter)
-    private val bluetoothConnectionService = AndroidBluetoothConnectionService(context, lifecycleScope, bluetoothAdapter, bluetoothScanService)
+    private val bluetoothConnectionService = AndroidBluetoothConnectionService(context, lifecycleScope, bluetoothAdapter, bluetoothScanService, this)
 
     override val activeConnection: StateFlow<BluetoothConnection?> get() =  bluetoothConnectionService.connection
 
     override val scannedDevices: StateFlow<List<BluetoothDevice>> get() = bluetoothScanService.scannedDevices
     override val pairedDevices: StateFlow<List<BluetoothDevice>> get() = bluetoothScanService.pairedDevices
+    override val lastPoints: MutableStateFlow<List<SonarData>> = MutableStateFlow(emptyList())
 
     override fun startDiscovery() = bluetoothScanService.startDiscovery()
     override fun stopDiscovery() = bluetoothScanService.stopDiscovery()

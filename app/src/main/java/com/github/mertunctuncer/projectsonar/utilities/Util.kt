@@ -1,5 +1,7 @@
 package com.github.mertunctuncer.projectsonar.utilities
 
+
+/*
 import com.github.mertunctuncer.projectsonar.domain.BluetoothMessage
 
 
@@ -16,3 +18,5 @@ fun String.toBluetoothMessage(isFromLocalUser: Boolean): BluetoothMessage {
 fun BluetoothMessage.toByteArray(): ByteArray {
     return "$senderName#$message".encodeToByteArray()
 }
+
+ */
