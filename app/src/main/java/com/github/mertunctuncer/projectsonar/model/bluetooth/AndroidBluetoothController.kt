@@ -10,7 +10,6 @@ import com.github.mertunctuncer.projectsonar.domain.SonarData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.util.concurrent.ArrayBlockingQueue
 
 class AndroidBluetoothController(
     override val context: Context,
@@ -43,6 +42,4 @@ class AndroidBluetoothController(
     override suspend fun pairAndConnect(device: BluetoothDevice) = bluetoothConnectionService.pairAndConnect(device)
 
     override fun disconnect() = bluetoothConnectionService.closeConnection()
-
-
 }

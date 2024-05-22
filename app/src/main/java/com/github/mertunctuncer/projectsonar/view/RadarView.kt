@@ -1,6 +1,5 @@
-package com.github.mertunctuncer.projectsonar.presentation
+package com.github.mertunctuncer.projectsonar.view
 
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,26 +33,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.PointMode
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.mertunctuncer.projectsonar.domain.BluetoothProtocol
 import com.github.mertunctuncer.projectsonar.domain.ControlMessage
 import com.github.mertunctuncer.projectsonar.domain.SonarData
 import com.github.mertunctuncer.projectsonar.model.bluetooth.BluetoothController
-import com.github.mertunctuncer.projectsonar.model.bluetooth.service.BluetoothConnectionService
-import com.github.mertunctuncer.projectsonar.ui.component.ConnectionCard
-import com.github.mertunctuncer.projectsonar.ui.theme.Purple40
-import com.github.mertunctuncer.projectsonar.ui.theme.Purple80
-import com.github.mertunctuncer.projectsonar.ui.theme.PurpleGrey40
+import com.github.mertunctuncer.projectsonar.viewmodel.RadarViewModel
 import kotlinx.coroutines.runBlocking
-import kotlin.math.cos
-import kotlin.math.max
-import kotlin.math.sin
 
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,7 +1,5 @@
-package com.github.mertunctuncer.projectsonar.presentation
+package com.github.mertunctuncer.projectsonar.viewmodel
 
-import android.util.Log
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mertunctuncer.projectsonar.domain.BluetoothDeviceData

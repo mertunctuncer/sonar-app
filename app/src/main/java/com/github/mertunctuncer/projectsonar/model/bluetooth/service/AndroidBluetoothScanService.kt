@@ -11,7 +11,6 @@ import android.content.IntentFilter
 import android.os.Build
 import android.util.Log
 import com.github.mertunctuncer.projectsonar.domain.BluetoothDeviceData
-import com.github.mertunctuncer.projectsonar.model.bluetooth.BluetoothController
 import com.github.mertunctuncer.projectsonar.utilities.toDomain
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,6 +57,7 @@ class AndroidBluetoothScanService(
             IntentFilter(BluetoothDevice.ACTION_FOUND)
         )
     }
+
     private val _isScanning: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val isScanning: StateFlow<Boolean> get() = _isScanning.asStateFlow()
 

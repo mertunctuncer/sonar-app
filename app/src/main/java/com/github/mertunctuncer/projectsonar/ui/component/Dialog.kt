@@ -51,6 +51,7 @@ fun ErrorDialog(
         }
     }
 }
+
 @Composable
 fun ProcessingDialog(text: String) {
     Dialog(onDismissRequest = {}) {

@@ -1,4 +1,4 @@
-package com.github.mertunctuncer.projectsonar.presentation
+package com.github.mertunctuncer.projectsonar
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
@@ -11,8 +11,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +18,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import com.github.mertunctuncer.projectsonar.model.bluetooth.AndroidBluetoothController
 import com.github.mertunctuncer.projectsonar.ui.theme.ProjectSonarTheme
+import com.github.mertunctuncer.projectsonar.view.BluetoothScreen
+import com.github.mertunctuncer.projectsonar.view.SonarScreen
+import com.github.mertunctuncer.projectsonar.viewmodel.BluetoothViewModel
+import com.github.mertunctuncer.projectsonar.viewmodel.RadarViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -35,7 +37,7 @@ class MainActivity : ComponentActivity() {
     ) }
 
     private val bluetoothViewModel by lazy { BluetoothViewModel(bluetoothController) }
-    private val radarViewModel by lazy { RadarViewModel(bluetoothController, this)}
+    private val radarViewModel by lazy { RadarViewModel(bluetoothController, this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -1,4 +1,4 @@
-package com.github.mertunctuncer.projectsonar.presentation
+package com.github.mertunctuncer.projectsonar.viewmodel
 
 import android.content.Context
 import android.media.MediaPlayer
